@@ -1,6 +1,7 @@
 import re
 from azure.identity import DefaultAzureCredential
-from azure.ai.projects import AIProjectClient
+#from azure.ai.projects import AIProjectClient
+from agent_framework.azure import AzureAIClient
 from agent_framework.observability import get_tracer, setup_observability
 import os
 from dotenv import load_dotenv
@@ -12,39 +13,32 @@ load_dotenv()
 
 myEndpoint = os.getenv("AZURE_AI_PROJECT")
 
-def createagent():
+async def createagent():
     setup_observability()
-    project_client = AIProjectClient(
-        endpoint=myEndpoint,
-        credential=DefaultAzureCredential(),
-    )
+    credential = DefaultAzureCredential()
 
-    myAgent = "rfpagent"
-    with get_tracer().start_as_current_span("CreateAgent", kind=SpanKind.CLIENT) as current_span:
+    myAgent = "cicdagenttest"
+    with get_tracer().start_as_current_span("cicdagenttest", kind=SpanKind.CLIENT) as current_span:
         print(f"Trace ID: {format_trace_id(current_span.get_span_context().trace_id)}")
         # Create a new agent
-        agent = project_client.agents.create(
-            agent_name=myAgent,
-            description="An agent to assist with RFP analysis and summarization.",
-            instructions="""
-            You are an expert assistant specialized in analyzing and summarizing Requests for Proposals (RFPs).
-            Your tasks include:
-            - Extracting key information from RFP documents.
-            - Summarizing the main points and requirements.
-            - Providing insights on how to respond effectively to RFPs.
-            Boundaries:
-            - Do not provide legal or financial advice.
-            - Always ensure confidentiality of sensitive information.
-            """,
-            tools=[
-                {
-                    "name": "RFPAnalyzer",
-                    "type": "custom_tool",
-                    "description": "A tool to analyze RFP documents and extract relevant information.",
-                }
-            ],
+        # Since no Agent ID is provided, the agent will be automatically created.
+        # For authentication, run `az login` command in terminal or replace AzureCliCredential with preferred
+        # authentication option.
+        # Create client and agent without async with
+        credential = DefaultAzureCredential()
+        client = AzureAIClient(credential=credential)
+
+        # Create agent (doesn't return a context manager)
+        agent = client.create_agent(
+            name=myAgent, 
+            instructions="You are CICD Agent, an AI agent designed to assist with continuous integration and continuous deployment tasks."
         )
-        print(f"Created agent: {agent.name} with ID: {agent.id}")
+
+        # Run the agent
+        result = await agent.run("Create a CICD pipeline for a Python application using GitHub Actions.")
+        print(result)
+
 
 if __name__ == "__main__":
-    createagent()
+    import asyncio
+    asyncio.run(createagent())

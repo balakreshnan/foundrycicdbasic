@@ -31,8 +31,8 @@ def existingagent():
         return m.group(1) if m else None
 
 
-    myAgent = "rfpagent"
-    with get_tracer().start_as_current_span("ExistingAgent", kind=SpanKind.CLIENT) as current_span:
+    myAgent = "cicdagenttest"
+    with get_tracer().start_as_current_span("ExistingCICDAgent", kind=SpanKind.CLIENT) as current_span:
         print(f"Trace ID: {format_trace_id(current_span.get_span_context().trace_id)}")
         # Get an existing agent
         agent = project_client.agents.get(agent_name=myAgent)

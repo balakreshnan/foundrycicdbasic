@@ -32,94 +32,87 @@ def get_weather(
 model_config = AzureOpenAIModelConfiguration(
     azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
     api_key=os.environ["AZURE_OPENAI_KEY"],
-    api_version="2024-02-15-preview",  # Compatible API version for evaluators
-    azure_deployment="gpt-4.1",  # Match the deployment used in the agent
+    api_version=os.environ["AZURE_OPENAI_API_VERSION"],
+    azure_deployment=os.environ["AZURE_OPENAI_DEPLOYMENT"],
 )
 
 
-tool_call_accuracy = ToolCallAccuracyEvaluator(model_config=model_config)
+
 
 async def main() -> None:
     print("=== Azure AI Chat Client with Existing Agent ===")
     setup_observability()
 
     # Create the client
-    async with (
-        DefaultAzureCredential() as credential,
-        AIProjectClient(endpoint=os.environ["AZURE_AI_PROJECT_ENDPOINT"], credential=credential) as client,
-    ):
-        deployment = "gpt-4.1"
-        chat_client = AzureAIAgentClient(credential=credential, 
-                            project_client=client,
-                            model_deployment_name=deployment
-                            )
-        # await chat_client.setup_azure_ai_observability()
-        # with get_tracer().start_as_current_span("IndAgentEvalRealtime", kind=SpanKind.CLIENT) as current_span:
-        #         print(f"Trace ID: {format_trace_id(current_span.get_span_context().trace_id)}")
-        myAgent = "IntentAgent"
-        # Create an agent that will persist
-        # created_agent = await client.agents.create(
-        #     model=os.environ["AZURE_AI_MODEL_DEPLOYMENT_NAME"], name="TestEvalAgent"
-        # )
-        created_agent = await client.agents.get(agent_name=myAgent)
-        query = "What's the weather like in Tokyo?"
-        try:
-            openai_client = client.get_openai_client()
+           
+    credential = DefaultAzureCredential()
+    client = AIProjectClient(endpoint=os.environ["AZURE_AI_PROJECT_ENDPOINT"], credential=credential)
+    deployment = "gpt-4.1"
+    # await chat_client.setup_azure_ai_observability()
+    with get_tracer().start_as_current_span("IndCICDAgentEvalRealtime", kind=SpanKind.CLIENT) as current_span:
+            print(f"Trace ID: {format_trace_id(current_span.get_span_context().trace_id)}")
+            myAgent = "cicdagenttest"
+            created_agent = await client.agents.get(agent_name=myAgent)
+            query = "What are the best practices for CI/CD?"
+            try:
+                openai_client = client.get_openai_client()
 
-            # Reference the agent to get a response
-            response = await openai_client.responses.create(
-                input=[{"role": "user", "content": "Summarize the RFP for virginia Railway Express project?"}],
-                extra_body={"agent": {"name": created_agent.name, "type": "agent_reference"}},
-            )
+                # Reference the agent to get a response
+                response = await openai_client.responses.create(
+                    input=[{"role": "user", "content": query}],
+                    extra_body={"agent": {"name": created_agent.name, "type": "agent_reference"}},
+                )
 
-            print("Initial Response Status:", response.status)
-            print("Response ID:", response.id)
-            print("\n" + "="*80 + "\n")
-            result = str(response)
+                print("Initial Response Status:", response.status)
+                print("Response ID:", response.id)
+                print("\n" + "="*80 + "\n")
+                result = str(response)
 
-            # query = "How is the weather in Seattle ?"
-            tool_call = {
-                "type": "tool_call",
-                "tool_call_id": "call_CUdbkBfvVBla2YP3p24uhElJ",
-                "name": "fetch_weather",
-                "arguments": {"location": "Seattle"},
-            }
+                # query = "How is the weather in Seattle ?"
+                tool_call = {
+                    "type": "tool_call",
+                    "tool_call_id": "call_CUdbkBfvVBla2YP3p24uhElJ",
+                    "name": "fetch_weather",
+                    "arguments": {"location": "Seattle"},
+                }
 
-            tool_definition = {
-                "id": "fetch_weather",
-                "name": "fetch_weather",
-                "description": "Fetches the weather information for the specified location.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {"location": {"type": "string", "description": "The location to fetch weather for."}},
-                },
-            }
-            response = tool_call_accuracy(query=query, tool_calls=tool_call, tool_definitions=tool_definition)
-            pprint(response)
-            response_completeness_evaluator = ResponseCompletenessEvaluator(model_config=model_config)
-            result = response_completeness_evaluator(
-                response=result,
-                ground_truth=result,
-            )
-            pprint(result)
-            intent_resolution_evaluator = IntentResolutionEvaluator(model_config)
-            # Success example. Intent is identified and understood and the response correctly resolves user intent
-            result = intent_resolution_evaluator(
-                query=query,
-                response=result,
-            )
-            pprint(result)
-            task_adherence_evaluator = TaskAdherenceEvaluator(model_config)
-            result = task_adherence_evaluator(
-                query=query,
-                response=result,
-            )
-            pprint(result)
-        finally:
-            # Clean up the agent manually
-            pass
-            
-            # await client.agents.delete_agent(created_agent.id)
+                tool_definition = {
+                    "id": "fetch_weather",
+                    "name": "fetch_weather",
+                    "description": "Fetches the weather information for the specified location.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {"location": {"type": "string", "description": "The location to fetch weather for."}},
+                    },
+                }
+
+                tool_call_accuracy = ToolCallAccuracyEvaluator(model_config=model_config)
+                response = tool_call_accuracy(query=query, tool_calls=tool_call, tool_definitions=tool_definition)
+                pprint(response)
+                response_completeness_evaluator = ResponseCompletenessEvaluator(model_config=model_config)
+                result = response_completeness_evaluator(
+                    response=result,
+                    ground_truth=result,
+                )
+                pprint(result)
+                intent_resolution_evaluator = IntentResolutionEvaluator(model_config)
+                # Success example. Intent is identified and understood and the response correctly resolves user intent
+                result = intent_resolution_evaluator(
+                    query=query,
+                    response=result,
+                )
+                pprint(result)
+                task_adherence_evaluator = TaskAdherenceEvaluator(model_config)
+                result = task_adherence_evaluator(
+                    query=query,
+                    response=result,
+                )
+                pprint(result)
+            finally:
+                # Clean up the agent manually
+                pass
+                
+                # await client.agents.delete_agent(created_agent.id)
 
 
 if __name__ == "__main__":
