@@ -504,12 +504,12 @@ sequenceDiagram
 
 ✅ **DO:**
 ```yaml
-# Use Azure Key Vault
+# Use Azure Key Vault (Best Practice: specify only required secrets)
 - task: AzureKeyVault@2
   inputs:
     azureSubscription: 'connection'
     KeyVaultName: 'my-keyvault'
-    SecretsFilter: '*'
+    SecretsFilter: 'azure-openai-key,azure-ai-project-endpoint'  # Specify needed secrets only
 
 # Reference secrets
 - script: |

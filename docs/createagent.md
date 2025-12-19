@@ -504,7 +504,8 @@ async def createagent():
 try:
     agent = client.get_agent(name=myAgent)
     print(f"Agent {myAgent} already exists")
-except:
+except Exception as e:
+    # Agent doesn't exist or other error occurred
     agent = client.create_agent(name=myAgent, instructions=instructions)
     print(f"Agent {myAgent} created successfully")
 ```

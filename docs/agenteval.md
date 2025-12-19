@@ -215,7 +215,7 @@ response_completeness_evaluator = ResponseCompletenessEvaluator(model_config=mod
 
 result = response_completeness_evaluator(
     response=result,
-    ground_truth=result,
+    ground_truth=result,  # Note: Using same as response is for demo only
 )
 pprint(result)
 ```
@@ -228,7 +228,27 @@ pprint(result)
 
 **Parameters:**
 - `response`: Agent's actual response
-- `ground_truth`: Expected/ideal response (or same for self-evaluation)
+- `ground_truth`: Expected/ideal response
+
+**⚠️ Important Limitation:**
+In the example code, `ground_truth=result` uses the same value as the response. This is for demonstration purposes only and makes the evaluation less meaningful. In production:
+
+```python
+# Better approach: Use actual ground truth data
+ground_truth = """
+CI/CD best practices include:
+1. Automated testing at every stage
+2. Continuous integration on every commit
+3. Automated deployment to staging
+4. Manual approval for production
+5. Monitoring and rollback capabilities
+"""
+
+result = response_completeness_evaluator(
+    response=agent_response,
+    ground_truth=ground_truth,  # Use real expected answer
+)
+```
 
 **Output Format:**
 ```python

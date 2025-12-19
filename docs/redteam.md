@@ -66,7 +66,11 @@ from typing import Any, Dict, Optional
 
 ```bash
 # Azure AI Project (required for red team orchestration)
-AZURE_AI_PROJECT=<project-id>/resourceGroups/<rg>/providers/Microsoft.MachineLearningServices/workspaces/<workspace>
+# Full Azure resource ID format (not just endpoint URL):
+AZURE_AI_PROJECT=/subscriptions/<subscription-id>/resourceGroups/<resource-group>/providers/Microsoft.MachineLearningServices/workspaces/<workspace-name>
+
+# Example:
+# AZURE_AI_PROJECT=/subscriptions/12345678-1234-1234-1234-123456789abc/resourceGroups/my-rg/providers/Microsoft.MachineLearningServices/workspaces/my-ai-project
 
 # Azure Authentication
 AZURE_SUBSCRIPTION_ID=your-subscription-id
@@ -78,7 +82,12 @@ AZURE_OPENAI_ENDPOINT=https://your-openai.openai.azure.com/
 AZURE_OPENAI_KEY=your-api-key
 ```
 
-**Note**: The `AZURE_AI_PROJECT` format is different from createagent.py - it uses the full Azure resource ID.
+**Note**: The `AZURE_AI_PROJECT` format is different from createagent.py - it uses the full Azure resource ID starting with `/subscriptions/...`, not just the endpoint URL.
+
+**To get your full resource ID:**
+```bash
+az ml workspace show --name <workspace-name> --resource-group <resource-group> --query id -o tsv
+```
 
 ## 📝 Code Walkthrough
 
