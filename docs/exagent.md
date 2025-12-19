@@ -40,10 +40,6 @@ sequenceDiagram
     S->>S: Extract Response Text
     S->>S: Display Citations
     S->>S: Format Output
-    
-    style S fill:#e1f5ff
-    style Agent fill:#c8e6c9
-    style MCP fill:#fff9c4
 ```
 
 ## 📦 Dependencies
