@@ -15,6 +15,10 @@ Agent framework and Microsoft Foundry CI/CD using basic
 1. First Create Agent and Deploy
 2. Use the existing agent, Evaluate Agent, Red Teaming
 
+## Architecture flow
+
+![Architecture](./images/deploymentflow.jpg)
+
 ## Creae Agent and Deploy
 
 - createagent.py: Creates a basic weather agent using the Azure AI Project SDK and deploys it to the Azure AI Project resource.
