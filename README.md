@@ -19,17 +19,20 @@ Agent framework and Microsoft Foundry CI/CD using basic
 
 ![Architecture](./images/deploymentflow.jpg)
 
-## Creae Agent and Deploy
+## Step 1: Create Agent and Deploy
 
 - createagent.py: Creates a basic weather agent using the Azure AI Project SDK and deploys it to the Azure AI Project resource.
+- Execute createagent.py only once.
 
-## Use the existing agent build application, Evaluate Agent, Red Teaming and Deploy
+## Step 2: Use the existing agent build application, Evaluate Agent, Red Teaming and Deploy
 
 - exagent.py: Uses an existing agent created in the previous step to answer a weather-related question.
 - agenteval.py: Evaluates the performance of the existing agent in real-time using the Azure
 - Redteam.py: Performs red teaming on the existing agent to test its robustness against adversarial prompts.
 
-  https://medium.com/gopenai/microsoft-foundry-agent-ops-agentops-9bb9304d2a0c
+exagent.py ---> agenteval.py ---> redteam.py
+
+https://medium.com/gopenai/microsoft-foundry-agent-ops-agentops-9bb9304d2a0c
 
 ### Azure DevOps Pipeline
 
