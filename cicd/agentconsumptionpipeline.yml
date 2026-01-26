@@ -6,9 +6,9 @@ trigger:
   paths:
     include:
       - createagent.py
-      - exagent.py
-      - agenteval.py
-      - redteam.py
+      - exagent.py  # Smoke test script
+      - agenteval.py  # Evaluation script
+      - redteam.py  # Red team testing script
       - requirements.txt
       - cicd/*
 
@@ -58,10 +58,11 @@ stages:
               publishLocation: 'pipeline'
 
   # ================================================================================
-  # DEV ENVIRONMENT - Create and test agent
+  # DEV ENVIRONMENT - Smoke test existing agent
+  # Smoke test verifies agent exists and can respond to a basic query
   # ================================================================================
   - stage: Dev
-    displayName: 'Deploy to Dev'
+    displayName: 'Smoke Test in Dev'
     dependsOn: Build
     condition: succeeded()
     variables:
@@ -75,8 +76,8 @@ stages:
       # - AZURE_AI_PROJECT_ENDPOINT_DEV
       # - AZURE_SERVICE_CONNECTION_DEV
     jobs:
-      - deployment: DeployAgentDev
-        displayName: 'Deploy Agent to Dev'
+      - deployment: TestAgentDev
+        displayName: 'Smoke Test Agent in Dev'
         environment: 'dev'
         strategy:
           runOnce:
@@ -102,7 +103,7 @@ stages:
                   displayName: 'Install Dependencies'
 
                 - task: AzureCLI@2
-                  displayName: 'Test Existing Agent in Dev'
+                  displayName: 'Run Agent Smoke Test'
                   inputs:
                     azureSubscription: '$(AZURE_SERVICE_CONNECTION_DEV)'
                     scriptType: 'bash'
@@ -113,16 +114,17 @@ stages:
                       export AZURE_TENANT_ID="$(AZURE_TENANT_ID)"
                       export AZURE_CLIENT_ID="$(AZURE_CLIENT_ID)"
                       
-                      echo "Testing existing agent in DEV..."
+                      echo "Running smoke test in DEV - verifying agent connectivity and basic functionality..."
                       python exagent.py
                     addSpnToEnvironment: true
                     continueOnError: true
 
   # ================================================================================
-  # TEST ENVIRONMENT - Evaluation and Red Team testing
+  # TEST ENVIRONMENT - Comprehensive Evaluation and Red Team Testing
+  # Runs detailed quality metrics and security assessments (not smoke tests)
   # ================================================================================
   - stage: Test
-    displayName: 'Deploy to Test'
+    displayName: 'Quality Assurance in Test'
     dependsOn: Dev
     condition: succeeded()
     variables:
@@ -137,7 +139,7 @@ stages:
       # - AZURE_SERVICE_CONNECTION_TEST
     jobs:
       - deployment: DeployAgentTest
-        displayName: 'Deploy and Evaluate Agent in Test'
+        displayName: 'Run Evaluation and Security Testing in Test'
         environment: 'test'
         strategy:
           runOnce:
@@ -163,7 +165,7 @@ stages:
                   displayName: 'Install Dependencies'
 
                 - task: AzureCLI@2
-                  displayName: 'Run Agent Evaluation'
+                  displayName: 'Run Agent Evaluation in Test'
                   inputs:
                     azureSubscription: '$(AZURE_SERVICE_CONNECTION_TEST)'
                     scriptType: 'bash'
@@ -230,7 +232,7 @@ stages:
       # - AZURE_SERVICE_CONNECTION_PROD
     jobs:
       - deployment: DeployAgentProd
-        displayName: 'Deploy Agent to Production'
+        displayName: 'Smoke Test Agent in Production'
         environment: 'production'
         strategy:
           runOnce:
@@ -256,7 +258,7 @@ stages:
                   displayName: 'Install Dependencies'
 
                 - task: AzureCLI@2
-                  displayName: 'Verify Production Agent'
+                  displayName: 'Post-Deployment Smoke Test in Prod'
                   inputs:
                     azureSubscription: '$(AZURE_SERVICE_CONNECTION_PROD)'
                     scriptType: 'bash'
@@ -267,7 +269,7 @@ stages:
                       export AZURE_TENANT_ID="$(AZURE_TENANT_ID)"
                       export AZURE_CLIENT_ID="$(AZURE_CLIENT_ID)"
                       
-                      echo "Verifying production agent..."
+                      echo "Running post-deployment smoke test in Prod..."
                       python exagent.py
                     addSpnToEnvironment: true
 
