@@ -1,0 +1,55 @@
+
+name: Agent Consumption - Single Environment
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  consume-agent:
+    name: Consume Existing Agent (Dev)
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run agent execution test
+        run: |
+          python exagent.py \
+            --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
+            --project "${{ secrets.AZURE_AI_PROJECT }}" \
+            --agent-name "${{ secrets.AGENT_NAME }}"
+
+      - name: Run evaluation
+        run: |
+          python agenteval.py \
+            --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
+            --project "${{ secrets.AZURE_AI_PROJECT }}" \
+            --agent-name "${{ secrets.AGENT_NAME }}"
+
+      - name: Run red team tests (optional)
+        run: |
+          python redteam.py \
+            --resource-group "${{ secrets.AZURE_RESOURCE_GROUP }}" \
+            --project "${{ secrets.AZURE_AI_PROJECT }}" \
+            --agent-name "${{ secrets.AGENT_NAME }}"
