@@ -1,15 +1,7 @@
 name: AI Agent - Create & Deploy
 
 on:
-  push:
-    branches:
-      - main
-      - develop
-    paths:
-      - 'createagent.py'
-      - 'requirements.txt'
-      - '.github/workflows/create-agent-multi-env.yml'
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch:  # Manual trigger only
 
 env:
   PYTHON_VERSION: '3.11'

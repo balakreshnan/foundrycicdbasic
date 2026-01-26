@@ -1,19 +1,7 @@
 name: AI Agent - Testing & Evaluation
 
 on:
-  push:
-    branches:
-      - main
-      - develop
-    paths:
-      - 'exagent.py'
-      - 'agenteval.py'
-      - 'redteam.py'
-      - 'requirements.txt'
-      - '.github/workflows/agent-consumption-multi-env.yml'
-  workflow_dispatch:  # Allows manual triggering
-  schedule:
-    - cron: '0 2 * * 1'  # Run every Monday at 2 AM UTC for weekly security testing
+  workflow_dispatch:  # Manual trigger only
 
 env:
   PYTHON_VERSION: '3.11'
