@@ -31,12 +31,12 @@ from azure.ai.projects.models._models import PromptAgentDefinition
 from azure.identity import DefaultAzureCredential
 from azure.ai.projects import AIProjectClient
 from azure.ai.projects.models import (
-    #AgentVersionDetails,
+    AgentVersionDetails,
     EvaluationTaxonomy,
     AzureAIAgentTarget,
     AgentTaxonomyInput,
     RiskCategory,
-    AgentVersionObject,
+    # AgentVersionObject,
 )
 import json
 import time
@@ -154,7 +154,7 @@ def main() -> None:
         #print("Agent deleted")
 
 
-def _get_tool_descriptions(agent: AgentVersionObject):
+def _get_tool_descriptions(agent: AgentVersionDetails):
     tools = agent.definition.get("tools", [])
     tool_descriptions = []
     for tool in tools:
