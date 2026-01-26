@@ -2,7 +2,7 @@ import re
 from azure.identity import DefaultAzureCredential
 #from azure.ai.projects import AIProjectClient
 from agent_framework.azure import AzureAIClient
-from agent_framework.observability import get_tracer, setup_observability
+from agent_framework.observability import get_tracer
 import os
 from dotenv import load_dotenv
 from opentelemetry.trace import SpanKind
@@ -14,7 +14,7 @@ load_dotenv()
 myEndpoint = os.getenv("AZURE_AI_PROJECT")
 
 async def createagent():
-    setup_observability()
+    #setup_observability()
     credential = DefaultAzureCredential()
 
     myAgent = "cicdagenttest"
